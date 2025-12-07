@@ -556,8 +556,6 @@ tests:
       FENCING_VALIDATION: "true"
     workflow: baremetalds-two-node-fencing-post-install-validation
 - as: e2e-metal-ovn-two-node-fencing-degraded-tn-suite-techpreview
-  capabilities:
-  - intranet
   cron: 30 23 * * *
   steps:
     cluster_profile: equinix-edge-enablement
