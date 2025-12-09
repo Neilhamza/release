@@ -65,6 +65,8 @@ SURV="$(oc get nodes -l node-role.kubernetes.io/master \
 log "Survivor: ${SURV}"
 
 # Host SSH setup (optional)
+SKIP_HOST_SSH="${SKIP_HOST_SSH:-0}"
+
 if [[ ! -f "${SHARED_DIR}/packet-conf.sh" ]]; then
   log "packet-conf.sh not found in SHARED_DIR; skipping host SSH actions"
   SKIP_HOST_SSH=1
@@ -76,8 +78,9 @@ fi
 # Degrade master-1 via hypervisor
 if [[ ${SKIP_HOST_SSH} -eq 0 && -n "${IP:-}" ]]; then
   log "Degrading ostest_master_1 via hypervisor @ ${IP}"
-  timeout -s 9 5m ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=20 \
-    root@"${IP}" bash -s << 'EOF' |& sed -e 's/.*auths.*/*** PULL_SECRET ***/g' || true
+
+  set +e
+  timeout -s 9 5m ssh "${SSHOPTS[@]}" root@"${IP}" bash -s << 'EOF' |& sed -e 's/.*auths.*/*** PULL_SECRET ***/g'
 set -euo pipefail
 
 if ! command -v virsh >/dev/null 2>&1; then
@@ -85,15 +88,12 @@ if ! command -v virsh >/dev/null 2>&1; then
   exit 0
 fi
 
-# Network name intentionally fixed
 NET="ostestbm"
-
 echo "[host] DHCP leases (${NET}):"
 virsh -c qemu:///system net-dhcp-leases "${NET}" || true
 
 MASTER0_IP="$(virsh -c qemu:///system net-dhcp-leases "${NET}" 2>/dev/null | awk '/master-0/ {print $5}' | cut -d/ -f1 | head -n1)"
 
-# pcs actions on master-0 *before* shutting down master-1
 if [[ -n "${MASTER0_IP:-}" ]]; then
   timeout 90s ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 \
     core@"${MASTER0_IP}" << 'PCS_EOF' || true
@@ -121,6 +121,13 @@ st="$(virsh -c qemu:///system domstate ostest_master_1 2>/dev/null || true)"
 echo "[host] VMs after:"
 virsh -c qemu:///system list --all || true
 EOF
+  ssh_rc=${PIPESTATUS[0]}
+  set -e
+
+  if [[ ${ssh_rc} -ne 0 ]]; then
+    log "ERROR: Failed to degrade ostest_master_1 via hypervisor (rc=${ssh_rc})"
+    exit ${ssh_rc}
+  fi
 else
   log "Host SSH not attempted (no packet-conf.sh or IP empty)"
 fi
