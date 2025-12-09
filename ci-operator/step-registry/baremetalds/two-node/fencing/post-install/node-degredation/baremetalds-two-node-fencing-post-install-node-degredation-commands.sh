@@ -36,6 +36,25 @@ must_have_time() {
   fi
 }
 
+wait_for_api_back() {
+  local deadline=$(( "$(date +%s)" + 300 ))
+  log "Waiting for API to become responsive after degradation..."
+
+  while [[ "$(date +%s)" -lt ${deadline} ]]; do
+    must_have_time
+    if oc get clusterversion.config.openshift.io cluster >/dev/null 2>&1 || \
+       oc get nodes >/dev/null 2>&1; then
+      log "API is responsive again."
+      return 0
+    fi
+    sleep 10
+  done
+
+  log "API did not become responsive within wait_for_api_back deadline."
+  return 1
+}
+
+
 pin_single_replica_recreate() {
   local ns="$1" dep="$2" dels="${3:-}"
   must_have_time
@@ -132,6 +151,7 @@ else
   log "Host SSH not attempted (no packet-conf.sh or IP empty)"
 fi
 
+wait_for_api_back
 
 # WORKAROUND for OCPBUGS-63312 (keep while bug is unresolved)
 
@@ -206,19 +226,16 @@ else
 
   # Delete any registry pod marooned on NotReady nodes
   NOT_READY_NODES="$(
-    oc get nodes -o jsonpath='{range .items[?(@.status.conditions[?(@.type=="Ready")].status!="True")]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+    oc get nodes \
+      -o jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[*]}{.type}{"="}{.status}{";"}{end}{"\n"}{end}' 2>/dev/null \
+      | awk '!/Ready=True/ {print $1}' || true
   )"
-  if [[ -z "${NOT_READY_NODES}" ]]; then
-    NOT_READY_NODES="$(
-      oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[*]}{.type}{"="}{.status}{";"}{end}{"\n"}{end}' \
-      | awk '!/Ready=True/ {print $1}'
-    )"
-  fi
 
   for nn in ${NOT_READY_NODES}; do
     pod="$(
-      oc -n openshift-image-registry get pod -o jsonpath='{range .items[*]}{.metadata.name} {.spec.nodeName}{"\n"}{end}' 2>/dev/null \
-      | awk -v N="${nn}" '$2==N && $1 ~ /^image-registry-/{print $1;exit}'
+      oc -n openshift-image-registry get pod \
+        -o jsonpath='{range .items[*]}{.metadata.name} {.spec.nodeName}{"\n"}{end}' 2>/dev/null \
+        | awk -v N="${nn}" '$2==N && $1 ~ /^image-registry-/{print $1;exit}'
     )"
     if [[ -n "${pod:-}" ]]; then
       oc -n openshift-image-registry delete pod "${pod}" --force --grace-period=0 || true
