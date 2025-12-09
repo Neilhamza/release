@@ -37,7 +37,7 @@ must_have_time() {
 }
 
 wait_for_api_back() {
-  local deadline=$(( "$(date +%s)" + 300 ))
+  local deadline=$(( "$(date +%s)" + 900 ))
   log "Waiting for API to become responsive after degradation..."
 
   while [[ "$(date +%s)" -lt ${deadline} ]]; do
