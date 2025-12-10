@@ -36,25 +36,6 @@ must_have_time() {
   fi
 }
 
-wait_for_api_back() {
-  local deadline=$(( "$(date +%s)" + 900 ))
-  log "Waiting for API to become responsive after degradation..."
-
-  while [[ "$(date +%s)" -lt ${deadline} ]]; do
-    must_have_time
-    if oc get clusterversion.config.openshift.io cluster >/dev/null 2>&1 || \
-       oc get nodes >/dev/null 2>&1; then
-      log "API is responsive again."
-      return 0
-    fi
-    sleep 10
-  done
-
-  log "API did not become responsive within wait_for_api_back deadline."
-  return 1
-}
-
-
 pin_single_replica_recreate() {
   local ns="$1" dep="$2" dels="${3:-}"
   must_have_time
@@ -76,6 +57,45 @@ pin_single_replica_recreate() {
   fi
 }
 
+wait_for_image_registry_stable() {
+  local deadline=$(( "$(date +%s)" + 900 ))
+  local stable_required=10
+  local stable_count=0
+
+  log "Waiting for image-registry ClusterOperator to stop Progressing (need ${stable_required} consecutive False)..."
+
+  while [[ "$(date +%s)" -lt ${deadline} ]]; do
+    must_have_time
+
+    local progressing
+    progressing="$(oc get co image-registry -o jsonpath='{.status.conditions[?(@.type=="Progressing")].status}' 2>/dev/null || echo "")"
+
+    if [[ "${progressing}" == "False" ]]; then
+      stable_count=$((stable_count + 1))
+      log "image-registry Progressing=False (${stable_count}/${stable_required} consecutive)"
+      if [[ ${stable_count} -ge ${stable_required} ]]; then
+        log "image-registry ClusterOperator considered stable (Progressing=False for ${stable_required} consecutive checks)."
+        return 0
+      fi
+    else
+      if [[ -n "${progressing}" ]]; then
+        log "image-registry Progressing is '${progressing}' (resetting stable counter)."
+      else
+        log "image-registry Progressing status unavailable (resetting stable counter)."
+      fi
+      stable_count=0
+    fi
+
+    sleep 10
+  done
+
+  # Best-effort only
+  log "image-registry did not stay non-Progressing long enough before timeout (continuing anyway)."
+  return 0
+}
+
+
+wait_for_image_registry_stable
 # Survivor node detection
 SURV="$(oc get nodes -l node-role.kubernetes.io/master \
   -o jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}{end}' \
@@ -117,7 +137,8 @@ if [[ -n "${MASTER0_IP:-}" ]]; then
   timeout 90s ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 \
     core@"${MASTER0_IP}" << 'PCS_EOF' || true
 sudo pcs status || true
-sudo pcs resource debug-stop etcd || true
+sudo pcs property set stonith-enabled=false
+sudo pcs resource cleanup etcd
 sudo pcs resource status || true
 PCS_EOF
 fi
@@ -150,8 +171,6 @@ EOF
 else
   log "Host SSH not attempted (no packet-conf.sh or IP empty)"
 fi
-
-wait_for_api_back
 
 # WORKAROUND for OCPBUGS-63312 (keep while bug is unresolved)
 
