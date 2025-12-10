@@ -1,5 +1,5 @@
 #!/bin/bash
-set -o nounset -o errexit -o pipefail
+set -o nounset -o errexit -o
 
 # Variables
 PROBE_NS="openshift-image-registry"               # fallback to operators later if missing
@@ -244,22 +244,20 @@ else
   }" || true
 
   # Delete any registry pod marooned on NotReady nodes
-  NOT_READY_NODES="$(
-    oc get nodes \
-      -o jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[*]}{.type}{"="}{.status}{";"}{end}{"\n"}{end}' 2>/dev/null \
-      | awk '!/Ready=True/ {print $1}' || true
-  )"
+NOT_READY_NODES="$(
+  oc get nodes \
+    -o jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[*]}{.type}{"="}{.status}{";"}{end}{"\n"}{end}' 2>/dev/null \
+    || echo ""
+)"
 
-  for nn in ${NOT_READY_NODES}; do
-    pod="$(
-      oc -n openshift-image-registry get pod \
-        -o jsonpath='{range .items[*]}{.metadata.name} {.spec.nodeName}{"\n"}{end}' 2>/dev/null \
-        | awk -v N="${nn}" '$2==N && $1 ~ /^image-registry-/{print $1;exit}'
-    )"
-    if [[ -n "${pod:-}" ]]; then
-      oc -n openshift-image-registry delete pod "${pod}" --force --grace-period=0 || true
-    fi
-  done
+TMP=""
+while read -r name conds; do
+  if [[ -n "${name}" && "${conds}" != *"Ready=True"* ]]; then
+    TMP+="${name} "
+  fi
+done <<< "${NOT_READY_NODES}"
+
+NOT_READY_NODES="${TMP}"
 
   # Bounded readiness: success when exactly 1 Running registry pod on SURV, none elsewhere
   deadline=$(( $(date +%s) + 1200 ))
