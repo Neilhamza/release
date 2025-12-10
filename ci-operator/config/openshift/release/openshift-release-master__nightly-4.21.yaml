@@ -683,6 +683,8 @@ tests:
         Two Node with Fencing should have podman etcd containers running on each node
         \|\[sig-arch] Managed cluster should ensure control plane pods do not run
         in best-effort QoS \|\[sig-cli] oc explain list uncovered GroupVersionResource
+        \|\[sig-architecture] Conformance Tests should have at least two untainted
+        nodes [Conformance]
     workflow: baremetalds-two-node-fencing
 - as: e2e-metal-ovn-two-node-fencing-serial
   capabilities:
