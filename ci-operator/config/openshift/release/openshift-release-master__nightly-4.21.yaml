@@ -614,9 +614,8 @@ tests:
         Managed cluster should \[apigroup:config\.openshift\.io\] start all core operators
         \[Skipped:Disconnected\] \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
         all registered tls artifacts must have no metadata violation regressions \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
-        all tls artifacts must be registered \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
-        collect certificate data \[Suite:openshift/conformance/parallel\] \[Suite:openshift/conformance/parallel/minimal\]
-        \[Suite:k8s\]\|\[sig-cli\] oc adm must-gather runs successfully \[apigroup:config\.openshift\.io\]
+        all tls artifacts must be registered \[Suite:openshift/conformance/parallel\]
+        \|\[sig-cli\] oc adm must-gather runs successfully \[apigroup:config\.openshift\.io\]
         \[Suite:openshift/conformance/parallel\]\|\[sig-cli\] oc adm must-gather runs
         successfully for audit logs \[apigroup:config\.openshift\.io\]\[apigroup:oauth\.openshift\.io\]
         \[Suite:openshift/conformance/parallel\]\|\[sig-cli\] oc adm node-logs \[Suite:openshift/conformance/parallel\]\|\[sig-etcd\]
@@ -680,8 +679,8 @@ tests:
         contain the source commit id \|\[sig-etcd]\[apigroup:config\.openshift\.io]\[OCPFeatureGate:DualReplica]
         Two Node with Fencing should have podman etcd containers running on each node
         \|\[sig-arch] Managed cluster should ensure control plane pods do not run
-        in best-effort QoS \|\[sig-cli] oc explain list uncovered GroupVersionResource
-        \|Conformance Tests should have at least two untainted nodes
+        in best-effort QoS \|Conformance Tests should have at least two untainted
+        nodes \|collect certificate data
     workflow: baremetalds-two-node-fencing
 - as: e2e-metal-ovn-two-node-fencing-serial
   capabilities:
