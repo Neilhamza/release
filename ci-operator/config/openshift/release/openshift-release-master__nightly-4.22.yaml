@@ -613,11 +613,10 @@ tests:
         kubelet terminates kube-apiserver gracefully extended \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Early\]
         Managed cluster should \[apigroup:config\.openshift\.io\] start all core operators
         \[Skipped:Disconnected\] \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
-        all registered tls artifacts must have no metadata violation regressions \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
-        all tls artifacts must be registered \[Suite:openshift/conformance/parallel\]
-        \|\[sig-cli\] oc adm must-gather runs successfully \[apigroup:config\.openshift\.io\]
-        \[Suite:openshift/conformance/parallel\]\|\[sig-cli\] oc adm must-gather runs
-        successfully for audit logs \[apigroup:config\.openshift\.io\]\[apigroup:oauth\.openshift\.io\]
+        all registered tls artifacts must have no metadata violation regressions \[Suite:openshift/conformance/parallel\]
+        \|all tls artifacts must be registered \|\[sig-cli\] oc adm must-gather runs
+        successfully \[apigroup:config\.openshift\.io\] \[Suite:openshift/conformance/parallel\]\|\[sig-cli\]
+        oc adm must-gather runs successfully for audit logs \[apigroup:config\.openshift\.io\]\[apigroup:oauth\.openshift\.io\]
         \[Suite:openshift/conformance/parallel\]\|\[sig-cli\] oc adm node-logs \[Suite:openshift/conformance/parallel\]\|\[sig-etcd\]
         etcd cluster has the same number of master nodes and voting members from the
         endpoints configmap \[Early\]\[apigroup:config\.openshift\.io\] \[Suite:openshift/conformance/parallel\]\|\[sig-instrumentation\]
