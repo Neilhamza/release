@@ -615,11 +615,10 @@ tests:
         \[Skipped:Disconnected\] \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
         all registered tls artifacts must have no metadata violation regressions \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
         all tls artifacts must be registered \[Suite:openshift/conformance/parallel\]\|\[sig-arch\]\[Late\]\[Jira:\\"kube-apiserver\\"\]
-        collect certificate data \[Suite:openshift/conformance/parallel\]\|\[sig-architecture\]
-        Conformance Tests should have at least two untainted nodes \[Conformance\]
-        \[Suite:openshift/conformance/parallel/minimal\] \[Suite:k8s\]\|\[sig-cli\]
-        oc adm must-gather runs successfully \[apigroup:config\.openshift\.io\] \[Suite:openshift/conformance/parallel\]\|\[sig-cli\]
-        oc adm must-gather runs successfully for audit logs \[apigroup:config\.openshift\.io\]\[apigroup:oauth\.openshift\.io\]
+        collect certificate data \[Suite:openshift/conformance/parallel\] \[Suite:openshift/conformance/parallel/minimal\]
+        \[Suite:k8s\]\|\[sig-cli\] oc adm must-gather runs successfully \[apigroup:config\.openshift\.io\]
+        \[Suite:openshift/conformance/parallel\]\|\[sig-cli\] oc adm must-gather runs
+        successfully for audit logs \[apigroup:config\.openshift\.io\]\[apigroup:oauth\.openshift\.io\]
         \[Suite:openshift/conformance/parallel\]\|\[sig-cli\] oc adm node-logs \[Suite:openshift/conformance/parallel\]\|\[sig-etcd\]
         etcd cluster has the same number of master nodes and voting members from the
         endpoints configmap \[Early\]\[apigroup:config\.openshift\.io\] \[Suite:openshift/conformance/parallel\]\|\[sig-instrumentation\]
@@ -677,14 +676,12 @@ tests:
         Prometheus .*when installed on the cluster shouldn't report any alerts in
         firing state apart from Watchdog and AlertmanagerReceiversNotConfigured \|\[sig-arch]\[Early]
         Managed cluster should \[apigroup:config\.openshift\.io] start all core operators
-        \|\[sig-architecture] Conformance Tests should have at least two untainted
-        nodes \[Conformance] \|\[sig-arch] ocp payload should be based on existing
-        source OLM version should contain the source commit id \|\[sig-etcd]\[apigroup:config\.openshift\.io]\[OCPFeatureGate:DualReplica]
+        \|\[sig-arch] ocp payload should be based on existing source OLM version should
+        contain the source commit id \|\[sig-etcd]\[apigroup:config\.openshift\.io]\[OCPFeatureGate:DualReplica]
         Two Node with Fencing should have podman etcd containers running on each node
         \|\[sig-arch] Managed cluster should ensure control plane pods do not run
         in best-effort QoS \|\[sig-cli] oc explain list uncovered GroupVersionResource
-        \|\[sig-architecture] Conformance Tests should have at least two untainted
-        nodes [Conformance]
+        \|Conformance Tests should have at least two untainted nodes
     workflow: baremetalds-two-node-fencing
 - as: e2e-metal-ovn-two-node-fencing-serial
   capabilities:
