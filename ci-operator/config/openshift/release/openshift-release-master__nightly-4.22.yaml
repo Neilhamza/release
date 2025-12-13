@@ -668,17 +668,17 @@ tests:
         Managed cluster should verify that nodes have no unexpected reboots \[Late\]
         \[Suite:openshift/conformance/parallel\]\|\[sig-node\]\[apigroup:config\.openshift\.io\]|
         CPU Partitioning node validation should have correct cpuset and cpushare set
-        in crio containers \[Suite:openshift/conformance/parallel\]| \|\[sig-instrumentation]
+        in crio containers \[Suite:openshift/conformance/parallel\]\|\[sig-instrumentation]
         Prometheus .* should start and expose a secured proxy and unsecured metrics
         \|\[sig-node]\[apigroup:config\.openshift\.io] CPU Partitioning node validation
         should have correct cpuset and cpushare set in crio containers \|\[sig-instrumentation]\[Late]
         Alerts shouldn.* exceed the series limit of total series sent via telemetry
-        from each cluster \[sig-node].*InPlacePodVerticalScaling \|when installed
-        on the cluster shouldn't report \|start all core operators \|Conformance Tests
-        should have at least two untainted \|source OLM version should contain the
-        source commit \|Two Node with Fencing should have podman etcd containers running
-        on each node \|Managed cluster should ensure control plane pods do not run
-        \|oc explain list uncovered GroupVersionResource \|contain the source commit
+        from each cluster \[sig-node].*InPlacePodVerticalScaling |when installed on
+        the cluster shouldn't report |start all core operators |Conformance Tests
+        should have at least two untainted |source OLM version should contain the
+        source commit |Two Node with Fencing should have podman etcd containers running
+        on each node |Managed cluster should ensure control plane pods do not run
+        |oc explain list uncovered GroupVersionResource |contain the source commit
         id
     workflow: baremetalds-two-node-fencing
 - as: e2e-metal-ovn-two-node-fencing-serial
